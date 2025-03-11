@@ -2,6 +2,7 @@ package ru.springcourse.libraryApp2.service;
 
 
 import jakarta.persistence.EntityNotFoundException;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,17 +12,19 @@ import ru.springcourse.libraryApp2.dto.BookDTO;
 import ru.springcourse.libraryApp2.model.Book;
 import ru.springcourse.libraryApp2.repository.BookRepository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
 public class BookService {
     private final BookRepository bookRepository;
+    private final ModelMapper bookMapper;
 
     @Autowired
-    public BookService(BookRepository bookRepository) {
+    public BookService(BookRepository bookRepository,
+                       ModelMapper bookMapper) {
         this.bookRepository = bookRepository;
+        this.bookMapper = bookMapper;
     }
 
     public Page<Book> findAllBooks(Pageable pageable) {
@@ -30,6 +33,9 @@ public class BookService {
 
     public Book findBookById(int id) {
         Optional<Book> foundBook = bookRepository.findById(id);
+        /**
+         * Review: Требуется добавить обработку исключения, когда книга не найдена.
+         */
         return foundBook.orElseThrow(() -> new EntityNotFoundException("Книга с таким id" + id + " не найдена"));
     }
 
@@ -39,17 +45,24 @@ public class BookService {
 
     @Transactional
     public void updateBook(int id, Book updatedBook) {
-        updatedBook.setId(id);
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Книга с таким id " + id + " не найдена"));
+        book.setDescription(updatedBook.getDescription());
+        book.setTitle(updatedBook.getTitle());
         bookRepository.save(updatedBook);
     }
 
     @Transactional
-    public void saveNewBook(Book book) {
-        bookRepository.save(book);
+    public void saveNewBook(BookDTO book) {
+        Book newBook = bookMapper.map(book, Book.class);
+        bookRepository.save(newBook);
     }
 
     @Transactional
     public boolean deleteBookByTitle(String title) {
+        /**
+         * Review: Переделать на выброс исключения, когда книга не найдена.
+         */
         Optional<Book> book = bookRepository.findByTitle(title);
         if (book.isPresent()) {
             bookRepository.delete(book.get());

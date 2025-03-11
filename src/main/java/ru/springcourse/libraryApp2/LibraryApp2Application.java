@@ -12,6 +12,9 @@ public class LibraryApp2Application {
 		SpringApplication.run(LibraryApp2Application.class, args);
 	}
 
+	/**
+	 * Review: Бины нужно создавать в отдельной конфигурации
+	 */
 	@Bean
 	public ModelMapper modelMapper() {
 		return new ModelMapper();

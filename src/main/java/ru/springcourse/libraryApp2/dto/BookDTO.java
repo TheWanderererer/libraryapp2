@@ -7,17 +7,11 @@ import lombok.NoArgsConstructor;
 public class BookDTO {
 
     private String title;
-
     private String description;
-
     private String author;
-
     private int isbn;
-
     private int printYear;
-
     private boolean readAlready;
-
     private String image;
 
 
@@ -77,6 +71,9 @@ public class BookDTO {
         this.title = title;
     }
 
+    /**
+     * Review: Конструкторы поднимаем в самый верх
+     */
     public BookDTO() {
     }
 }
