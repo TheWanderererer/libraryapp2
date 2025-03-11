@@ -12,16 +12,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.springcourse.libraryApp2.dto.BookDTO;
-import ru.springcourse.libraryApp2.dto.BookRequestDTO;
 import ru.springcourse.libraryApp2.model.Book;
 import ru.springcourse.libraryApp2.service.BookService;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @RestController
+/**
+ * Review: api/v1/library - для того чтобы обеспечить версионность нашего API.
+ */
 @RequestMapping("/library")
 public class BookController {
+
     private final BookService bookService;
     private final ModelMapper modelMapper;
 
@@ -48,7 +48,7 @@ public class BookController {
 
     @PostMapping()
     public ResponseEntity<HttpStatus> addNewBook(@RequestBody BookDTO bookDTO) {
-        bookService.saveNewBook(convertToBook(bookDTO));
+        bookService.saveNewBook(bookDTO);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
@@ -59,6 +59,9 @@ public class BookController {
         return bookService.findBookByPhrase(phrase, pageable).map(this::convertToBookDTO);
     }
 
+    /**
+     * Review: @PatchMapping - для обновления частично
+     */
     @PatchMapping("/{id}")
     public ResponseEntity<HttpStatus> updateBook(@PathVariable("id") int id, @RequestBody BookDTO bookDTO) {
         bookService.updateBook(id, convertToBook(bookDTO));
