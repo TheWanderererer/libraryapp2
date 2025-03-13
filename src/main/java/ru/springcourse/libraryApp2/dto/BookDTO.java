@@ -20,6 +20,8 @@ public class BookDTO {
 
     private String image;
 
+    public BookDTO() {
+    }
 
     public String getDescription() {
         return description;
@@ -75,8 +77,5 @@ public class BookDTO {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public BookDTO() {
     }
 }

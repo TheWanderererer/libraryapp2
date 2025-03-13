@@ -12,23 +12,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.springcourse.libraryApp2.dto.BookDTO;
-import ru.springcourse.libraryApp2.dto.BookRequestDTO;
 import ru.springcourse.libraryApp2.model.Book;
 import ru.springcourse.libraryApp2.service.BookService;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @RestController
-@RequestMapping("/library")
+@RequestMapping("/api/v1/library")
 public class BookController {
     private final BookService bookService;
-    private final ModelMapper modelMapper;
+    private final ModelMapper bookMapper;
 
     @Autowired
-    public BookController(BookService bookService, ModelMapper modelMapper) {
+    public BookController(BookService bookService, ModelMapper bookMapper) {
         this.bookService = bookService;
-        this.modelMapper = modelMapper;
+        this.bookMapper = bookMapper;
     }
 
     @GetMapping()
@@ -38,17 +34,17 @@ public class BookController {
             @RequestParam(defaultValue = "id") String sortBy
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
-        return bookService.findAllBooks(pageable).map(book -> modelMapper.map(book, BookDTO.class));
+        return bookService.findAllBooks(pageable).map(book -> bookMapper.map(book, BookDTO.class));
     }
 
     @GetMapping("/{id}")
-    public BookDTO getBookById(@PathVariable("id") int id) {
+    public BookDTO findBookById(@PathVariable("id") int id) {
         return convertToBookDTO(bookService.findBookById(id));
     }
 
     @PostMapping()
     public ResponseEntity<HttpStatus> addNewBook(@RequestBody BookDTO bookDTO) {
-        bookService.saveNewBook(convertToBook(bookDTO));
+        bookService.saveNewBook(bookDTO);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
@@ -59,7 +55,7 @@ public class BookController {
         return bookService.findBookByPhrase(phrase, pageable).map(this::convertToBookDTO);
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<HttpStatus> updateBook(@PathVariable("id") int id, @RequestBody BookDTO bookDTO) {
         bookService.updateBook(id, convertToBook(bookDTO));
         return ResponseEntity.ok(HttpStatus.OK);
@@ -67,25 +63,21 @@ public class BookController {
 
     @DeleteMapping("/{title}")
     public ResponseEntity<HttpStatus> deleteBookByTitle(@PathVariable("title") String title) {
-        boolean deleted = bookService.deleteBookByTitle(title);
-        if (deleted) {
-            return ResponseEntity.ok(HttpStatus.OK);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(HttpStatus.NOT_FOUND);
-        }
+        bookService.deleteBookByTitle(title);
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @PatchMapping("/read/{id}")
+    @PutMapping("/read/{id}")
     public ResponseEntity<HttpStatus> setReadAlready(@PathVariable("id") int id) {
         bookService.setReadAlready(id);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
     private Book convertToBook(BookDTO bookDTO) {
-        return modelMapper.map(bookDTO, Book.class);
+        return bookMapper.map(bookDTO, Book.class);
     }
 
     private BookDTO convertToBookDTO(Book book) {
-        return modelMapper.map(book, BookDTO.class);
+        return bookMapper.map(book, BookDTO.class);
     }
 }
